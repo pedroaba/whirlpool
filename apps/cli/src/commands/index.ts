@@ -1,0 +1,6 @@
+export { runCacheClean, runCacheSize } from './cache-clean.ts'
+export { runDisk } from './disk.ts'
+export { runOrphansClean } from './orphans-clean.ts'
+export { runScan } from './scan.ts'
+export { runTrashEmpty } from './trash-empty.ts'
+export { runTrashList } from './trash-list.ts'
