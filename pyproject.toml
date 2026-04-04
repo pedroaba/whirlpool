@@ -1,0 +1,54 @@
+[project]
+name = "whirlpool"
+version = "0.1.0"
+description = "Recover disk space on macOS with low-risk cleanup workflows: inspect disk usage, find app remnants under ~/Library, manage caches, and work with Finder Trash."
+readme = "README.md"
+authors = [
+    { name = "pedroaba", email = "pedr.augustobarbosa.aparecido@gmail.com" }
+]
+requires-python = ">=3.14"
+dependencies = [
+    "prompt-toolkit>=3.0.52",
+    "rich>=14.3.3",
+    "tqdm>=4.67.3",
+    "typer>=0.24.1",
+]
+
+[build-system]
+requires = ["uv_build>=0.9.21,<0.10.0"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = "whirlpool"
+module-root = ""
+
+[project.scripts]
+whirlpool = "whirlpool.cli:main"
+
+[project.optional-dependencies]
+dev = [
+    "black>=25.1.0,<26.0.0",
+    "flake8>=7.2.0,<8.0.0",
+    "isort>=6.0.0,<7.0.0",
+    "pytest>=8.4.0,<9.0.0",
+    "taskipy>=1.14.1,<2.0.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.black]
+line-length = 88
+target-version = ["py314"]
+
+[tool.isort]
+profile = "black"
+line_length = 88
+py_version = 314
+skip = [".venv"]
+
+[tool.taskipy.tasks]
+run = "uv run whirlpool"
+test = "uv run pytest tests -v"
+format = "uv run --extra dev black . && uv run --extra dev isort ."
+lint = "uv run --extra dev flake8 ."
