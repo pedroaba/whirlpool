@@ -1,106 +1,109 @@
 # Whirlpool
 
-Recover disk space on **macOS** with **low‑risk cleanup** workflows: inspect disk usage, find app remnants under `~/Library`, manage caches, and work with Finder Trash.
+Recover disk space on **macOS** with **low-risk cleanup** workflows: inspect disk usage, find app remnants under `~/Library`, manage caches, and work with Finder Trash.
 
-- **Safer by design**: read‑only scans + “move to Trash” flows (recoverable) instead of irreversible deletes.
-- **Honest output**: shows sizes and conservative “reason” labels; false positives are possible and explicitly expected.
-- **Practical tools**: disk overview, app remnant discovery, cache measurement/cleanup, Trash list/empty.
+- **Safer by design**: read-only scans first; destructive steps ask for confirmation.
+- **Honest output**: shows sizes and paths; heuristics can miss or mislabel—review before you clean.
+- **Practical focus**: today the CLI ships **cache inspection and cleanup**; more workflows can grow from here.
 
-> Note: v1 is **macOS‑only**.
+> **v0.1** is **macOS-only** and implemented in **Python** (requires **Python 3.14+**).
 
 ## Why it’s safer than typical “cleaners”
 
-Whirlpool is built around **recovery and user intent**:
+Whirlpool is built around **visibility and user intent**:
 
-- **Scan is read‑only**: it inspects and reports candidates before any changes.
-- **Cleanup is recoverable**: primary cleanup flows move items to **Finder Trash** so you can restore them.
-- **Confirmation and dry‑runs**: destructive steps require explicit confirmation and support simulation modes.
+- **`cache plan` is read-only**: scans and reports what would be targeted—nothing is deleted.
+- **`cache clear` is explicit**: shows a confirmation (unless you pass `--yes`) before removing paths.
+- **Review the table**: cache folders are shared across apps; only remove what you understand.
 
-## What it can do
+## What it can do today
 
-- **Disk status**: used / free / total for your boot volume.
-- **App remnant scan**: find leftover data tied to installed apps (common `~/Library/*` locations).
-- **Cache cleanup**: measure and clean planned cache paths (config‑driven).
-- **Trash tools**: list what’s in `~/.Trash`, and empty Trash when you decide.
+| Command | What it does |
+|--------|----------------|
+| `whirlpool cache plan` | Summarize cache size and list paths that **`cache clear` would remove** (no writes). |
+| `whirlpool cache clear` | Re-scan, confirm (or `-y`), then **delete** those cache paths. **Irreversible.** |
 
-## Get it / run it
+Common options (both commands):
 
-### Option A — Whirlpool.app (drag to Applications)
+- `--no-browsers` — skip known browser cache locations.
+- `--ignore PATH` — exclude paths (repeatable).
 
-This repo can produce a **Whirlpool.app** you can run like a normal macOS app, including passing CLI args.
+Run `whirlpool cache` or `whirlpool --help` for full help.
 
-Example:
+## Requirements
 
-```bash
-open -a Whirlpool --args disk
-```
+- **macOS**
+- **[uv](https://docs.astral.sh/uv/)** (recommended) and **Python 3.14+**
 
-Build / install details:
-- [`apps/cli/README.md`](apps/cli/README.md#whirlpoolapp-bundle-id-compedroabawhirlpool)
+## Install and run
 
-### Option B — CLI on your PATH (standalone binary)
-
-Install `whirlpool` to your PATH as a compiled standalone executable.
-
-Example install:
+Clone the repo, then from the project root:
 
 ```bash
-bun run install-cli
+uv sync
 ```
 
-First commands:
+Optional dev tools (Black, isort, Flake8, pytest, taskipy):
 
 ```bash
-whirlpool disk
-whirlpool scan Safari
-whirlpool trash list
+uv sync --extra dev
 ```
 
-Exact flags and command reference:
-- [`apps/cli/README.md`](apps/cli/README.md#command-reference)
+Run the CLI (console script):
+
+```bash
+uv run whirlpool --help
+uv run whirlpool cache plan
+```
+
+Or activate the virtualenv and call `whirlpool` directly:
+
+```bash
+source .venv/bin/activate   # or your shell’s equivalent
+whirlpool cache plan
+```
+
+You can also run the package module:
+
+```bash
+uv run python -m whirlpool
+```
+
+## Development tasks (taskipy)
+
+With `--extra dev` installed:
+
+| Task | Command |
+|------|---------|
+| CLI (same as `uv run whirlpool`) | `uv run --extra dev task run` |
+| Tests | `uv run --extra dev task test` |
+| Format (Black + isort) | `uv run --extra dev task format` |
+| Lint (Flake8) | `uv run --extra dev task lint` |
 
 ## Privacy & permissions
 
-- **Local-first**: Whirlpool runs locally on your machine. No telemetry by default.
-- **Full Disk Access (Trash)**: some Trash operations may require macOS **Full Disk Access** for the host app (Terminal, Cursor, iTerm, etc.). If you see permission errors for `~/.Trash`, grant access under **Privacy & Security → Full Disk Access** and retry.\n\nMore context (and a deep link helper):\n- [`packages/platform/README.md`](packages/platform/README.md)
+- **Local-first**: runs on your machine; no telemetry is configured in this repo by default.
+- **Full Disk Access**: if macOS blocks reads under `~/Library/Caches` or similar, you may need **Full Disk Access** for the host app (Terminal, Cursor, iTerm, etc.) under **System Settings → Privacy & Security → Full Disk Access**.
 
 ## FAQ
 
 ### Can this break my Mac?
 
-Whirlpool is designed to be conservative: it prefers **reporting first** and uses **Trash** as a safety net. Still, you should review candidates—macOS data can be shared across apps, and heuristics can produce false positives.
+Use **`cache plan`** first. **`cache clear`** removes directories/files under the planned paths—recovery is not through Finder Trash for that flow. Prefer small, understood targets and `--ignore` for paths you want to keep.
 
-### Does it delete files permanently?
+### Does `cache clear` move things to Trash?
 
-Some commands can **empty Trash**, which is permanent. The main “cleanup” workflow is designed to be **recoverable** (move to Trash) unless you explicitly choose otherwise.
-
-### Why doesn’t it always know which app created a file?
-
-Many filesystem entries don’t store a reliable “created by app” field. Whirlpool only shows app attribution when there is evidence (path patterns or metadata); otherwise it reports **unknown**.\n\nProduct rationale:\n- [`docs/PRD-whirlpool-cli.md`](docs/PRD-whirlpool-cli.md#6-metadados--honestidade-de-produto)
+**No.** It deletes the planned cache paths after confirmation (or with `--yes`). Use **`cache plan`** to see exactly what would be affected.
 
 ### Does it work on Windows or Linux?
 
-Not in v1. The current release targets **macOS only**.
+Not in v1. The project targets **macOS** (paths and conventions assume macOS).
 
 ## Developers / contributors
 
-Technical docs are kept in internal READMEs:
-
-- **CLI reference & build**: [`apps/cli/README.md`](apps/cli/README.md)
-- **Contributing**: [`CONTRIBUTING.md`](CONTRIBUTING.md)
-- **Product PRD**: [`docs/PRD-whirlpool-cli.md`](docs/PRD-whirlpool-cli.md)
-- **Workspace packages**:
-  - [`packages/cleanup/README.md`](packages/cleanup/README.md)
-  - [`packages/config/README.md`](packages/config/README.md)
-  - [`packages/disk/README.md`](packages/disk/README.md)
-  - [`packages/explore/README.md`](packages/explore/README.md)
-  - [`packages/format/README.md`](packages/format/README.md)
-  - [`packages/fs-meta/README.md`](packages/fs-meta/README.md)
-  - [`packages/logging/README.md`](packages/logging/README.md)
-  - [`packages/platform/README.md`](packages/platform/README.md)
-  - [`packages/system-apps/README.md`](packages/system-apps/README.md)
-  - [`packages/taxonomy/README.md`](packages/taxonomy/README.md)
+- **[`CONTRIBUTING.md`](CONTRIBUTING.md)** — how to contribute
+- **[`LICENSE`](LICENSE)** — proprietary license; all rights reserved unless agreed in writing with the licensor
 
 ## License
 
-Proprietary — see [`LICENSE`](LICENSE). All rights reserved; no use or redistribution except under written agreement with the licensor.
+Proprietary — see [`LICENSE`](LICENSE).

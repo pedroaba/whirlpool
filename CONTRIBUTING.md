@@ -1,75 +1,89 @@
-# Contributing to macos-cleaner / whirlpool
+# Contributing to Whirlpool
 
-Thanks for your interest in improving this project. This document explains how to work in the monorepo and what we expect from contributions.
+Thanks for your interest in improving this project. This document explains how to work in the repository and what we expect from contributions.
 
 ## Scope and platform
 
-- **whirlpool** is **macOS-only** (`assertMacOS()` on startup). Changes should keep that assumption unless the maintainers explicitly extend support.
-- The codebase is **TypeScript**, managed with **Bun** and **Turborepo** (see [README.md](README.md)).
+- **Whirlpool** targets **macOS** only (paths and behavior assume a Mac user layout).
+- The codebase is **Python 3.14+**, packaged with **[uv](https://docs.astral.sh/uv/)** and built with **`uv_build`** (see [README.md](README.md)).
 
 ## Prerequisites
 
-- [Bun](https://bun.com) (same major version as `packageManager` in the root `package.json`)
-- A Mac to run and test the CLI realistically (disk, Trash, Full Disk Access, etc.)
+- [uv](https://docs.astral.sh/uv/getting-started/installation/) installed
+- **Python 3.14+** (uv can install a matching interpreter via `.python-version` if you use `uv python`)
+- A Mac to run and test the CLI realistically (caches under `~/Library`, permissions, etc.)
 
 ## Getting started
 
 From the repository root:
 
 ```bash
-bun install
+uv sync
+uv sync --extra dev   # Black, isort, Flake8, pytest, taskipy
 ```
 
-Run the CLI during development (use `--` before flags when calling through `bun`):
+Run the CLI during development:
 
 ```bash
-bun apps/cli/src/index.ts -- --help
-bun apps/cli/src/index.ts disk
+uv run whirlpool --help
+uv run whirlpool cache plan
 ```
 
-See [apps/cli/README.md](apps/cli/README.md) for command reference.
+Or the package entry point:
+
+```bash
+uv run python -m whirlpool
+```
+
+See [README.md](README.md) for command reference and task shortcuts.
 
 ## Checks before you open a PR
 
-Run from the **repository root**:
+Run from the **repository root** (with dev dependencies installed):
 
 ```bash
-bun run check-types   # TypeScript across workspaces
-bun run lint          # ESLint (per package)
+uv run --extra dev flake8 .
+uv run --extra dev black --check .
+uv run --extra dev isort --check-only .
+uv run --extra dev pytest tests -v    # when tests exist
 ```
 
-Fix any reported issues in the packages you touched.
-
-Optional:
+Or use **taskipy**:
 
 ```bash
-bun run build         # turbo build (all packages that define build)
-bun run build:cli     # compile standalone whirlpool binary
+uv run --extra dev task lint
+uv run --extra dev task format   # applies Black + isort (review the diff)
+uv run --extra dev task test
 ```
+
+Fix any reported issues in the files you touched.
 
 ## Code style
 
 - Match existing **naming**, **imports**, and **patterns** in the files you edit.
-- **Comments and user-facing CLI strings** in this repo are expected to be in **English** unless a file already establishes another convention for a specific audience.
+- **Comments and user-facing CLI strings** are expected to be in **English** unless a file already establishes another convention for a specific audience.
 - Prefer **small, focused changes**; avoid drive-by refactors unrelated to your fix or feature.
-- **Do not commit** secrets, API keys, or machine-specific paths.
+- **Do not commit** secrets, API keys, machine-specific paths, or **`__pycache__` / `.pyc`** artifacts. Add or respect ignore rules if you introduce new build outputs.
 
 ## Commits and pull requests
 
-- Use **clear commit messages**. We recommend [Conventional Commits](https://www.conventionalcommits.org/) (e.g. `fix(cli): …`, `feat(explore): …`, `docs(readme): …`).
+- Use **clear commit messages**. We recommend [Conventional Commits](https://www.conventionalcommits.org/) (e.g. `fix(cli): …`, `feat(whirlpool): …`, `docs(readme): …`).
 - In the PR description, explain **what** changed and **why**, and how you **verified** it (commands you ran, manual checks on macOS).
 - Link related **issues** or discussions when applicable.
 
 ## Safety and privacy
 
-**whirlpool** can **list**, **move to Trash**, or **delete** user data depending on the command. When testing:
+Whirlpool can **inspect** and **delete** files under cache-related paths depending on the command. When testing:
 
-- Prefer **dry-run** flags where available (`scan` is read-only; use caution with `orphans-clean`, `cache clean`, `trash clear`).
+- **`cache plan`** is read-only; use it to see what **`cache clear`** would target.
+- **`cache clear`** removes planned paths from disk (not Finder Trash) after confirmation unless you pass **`--yes`**. Test on disposable data or a throwaway user when possible.
 - Do not assume CI covers all macOS behaviors; call out **manual** test steps in the PR when relevant.
 
 ## Project layout
 
-Workspace packages live under `packages/*`; the CLI is under `apps/cli`. Per-package notes live in each `README.md`. Start with the root [README.md](README.md) **Workspace layout** table.
+- **`whirlpool/`** — Python package (CLI in `whirlpool/cli.py`, commands under `whirlpool/command/`, disk logic under `whirlpool/disk/`, utilities under `whirlpool/utils/`).
+- **`main.py`** — thin entry that delegates to the CLI (optional local runner).
+- **`pyproject.toml`** — project metadata, dependencies, `uv_build` settings, and tool config (Black, isort, Flake8, pytest, taskipy).
 
 ## Legal
 
