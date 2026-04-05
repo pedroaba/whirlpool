@@ -25,9 +25,9 @@ class ApplicationCommandGroup:
             help="Lista os aplicativos que mais consomem recursos no sistema.",
         )(self.list)
         self.app.command(
-            "uninstall",
+            "remove",
             help="Desinstala um aplicativo e remove todos os seus dados.",
-        )(self.uninstall)
+        )(self.remove)
 
     def list(self) -> None:
         console = self._console_factory()
@@ -36,7 +36,7 @@ class ApplicationCommandGroup:
             "desenvolvimento.[/yellow]"
         )
 
-    def uninstall(self) -> None:
+    def remove(self) -> None:
         console = self._console_factory()
         console.print(
             "[yellow]Funcionalidade 'desinstalar aplicativo' em "
