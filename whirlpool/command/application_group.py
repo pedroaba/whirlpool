@@ -12,6 +12,7 @@ class ApplicationCommandGroup:
     ) -> None:
         self._console_factory = console_factory or Console
         self.app = typer.Typer(
+            name="apps",
             help=(
                 "Lista os aplicativos que mais consomem recursos no sistema e "
                 "permite desinstalar um app e "

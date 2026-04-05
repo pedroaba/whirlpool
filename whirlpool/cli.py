@@ -45,7 +45,7 @@ class WhirlpoolCLI:
         )
         self.app.callback()(_build_root_callback(metadata.version))
         self.app.add_typer(cache_command_group.app, name="cache")
-        self.app.add_typer(application_command_group.app, name="application")
+        self.app.add_typer(application_command_group.app, name="apps")
 
     @classmethod
     def create_default(cls) -> "WhirlpoolCLI":
