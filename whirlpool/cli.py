@@ -1,156 +1,67 @@
-from dataclasses import dataclass, field
-from typing import Annotated
+from collections.abc import Callable
 
 import typer
-from rich.console import Console
 
-from whirlpool import __version__
-from whirlpool.command.cache import CacheCommand
+from whirlpool.command.application_group import ApplicationCommandGroup
+from whirlpool.command.cache_group import CacheCommandGroup
+from whirlpool.models.project import ProjectMetadata
 
 
-@dataclass(slots=True)
-class ProjectMetadata:
-    name: str = "Whirlpool"
-    description: str = (
-        "Uma interface de linha de comando (CLI) "
-        "para facilitar tarefas de limpeza, manutenção e otimização no macOS."
-    )
-    version: str = field(default=__version__)
+def _build_root_callback(version: str) -> Callable[..., None]:
+    def version_callback(value: bool) -> None:
+        if value:
+            typer.echo(version)
+            raise typer.Exit(0)
+
+    def root_callback(
+        _version: bool = typer.Option(
+            False,
+            "--version",
+            "-V",
+            help="Show version and exit.",
+            callback=version_callback,
+            is_eager=True,
+        ),
+    ) -> None:
+        pass
+
+    return root_callback
 
 
 class WhirlpoolCLI:
-    """Class-based Typer application entry."""
-
-    def __init__(self) -> None:
-        self.metadata = ProjectMetadata()
-        self._cli_app = typer.Typer(
+    def __init__(
+        self,
+        metadata: ProjectMetadata,
+        cache_command_group: CacheCommandGroup,
+        application_command_group: ApplicationCommandGroup,
+    ) -> None:
+        self.metadata = metadata
+        self.cache_command_group = cache_command_group
+        self.application_command_group = application_command_group
+        self.app = typer.Typer(
             name="whirlpool",
-            help=self.metadata.description,
+            help=metadata.description,
             no_args_is_help=True,
         )
-        self._cache_app = typer.Typer(
-            help="Inspecionar e limpar caches do usuário e de navegadores.",
-            no_args_is_help=True,
+        self.app.callback()(_build_root_callback(metadata.version))
+        self.app.add_typer(cache_command_group.app, name="cache")
+        self.app.add_typer(application_command_group.app, name="application")
+
+    @classmethod
+    def create_default(cls) -> "WhirlpoolCLI":
+        return cls(
+            metadata=ProjectMetadata(),
+            cache_command_group=CacheCommandGroup(),
+            application_command_group=ApplicationCommandGroup(),
         )
-        self._cli_app.add_typer(self._cache_app, name="cache")
-        self._register_root_callback()
-        self._register_cache_plan_command()
-        self._register_cache_clear_command()
 
     def run(self) -> None:
-        self._cli_app()
+        self.app()
 
-    def _register_root_callback(self) -> None:
-        version_str = self.metadata.version
 
-        def version_callback(value: bool) -> None:
-            if value:
-                typer.echo(version_str)
-                raise typer.Exit(0)
-
-        def root_callback(
-            _version: bool = typer.Option(
-                False,
-                "--version",
-                "-V",
-                help="Show version and exit.",
-                callback=version_callback,
-                is_eager=True,
-            ),
-        ) -> None:
-            pass
-
-        self._cli_app.callback()(root_callback)
-
-    def _register_cache_plan_command(self) -> None:
-        def cache_plan_handler(
-            no_browsers: bool = typer.Option(
-                False,
-                "--no-browsers",
-                help="Do not include known browser cache directories.",
-            ),
-            ignore: Annotated[
-                list[str],
-                typer.Option(
-                    "--ignore",
-                    help="Exclude paths matching this prefix (repeatable).",
-                ),
-            ] = [],
-        ) -> None:
-            self._run_cache_plan(no_browsers=no_browsers, ignore=ignore)
-
-        self._cache_app.command(
-            "plan",
-            help=(
-                "Mostra resumo do cache e os caminhos que seriam removidos "
-                "(não apaga nada)."
-            ),
-        )(cache_plan_handler)
-
-    def _register_cache_clear_command(self) -> None:
-        def cache_clear_handler(
-            yes: bool = typer.Option(
-                False,
-                "--yes",
-                "-y",
-                help="Skip confirmation prompt.",
-            ),
-            verbose: bool = typer.Option(
-                False,
-                "--verbose",
-                "-v",
-                help="Show the same plan report as `cache plan` before confirming.",
-            ),
-            no_browsers: bool = typer.Option(
-                False,
-                "--no-browsers",
-                help="Do not include known browser cache directories.",
-            ),
-            ignore: Annotated[
-                list[str],
-                typer.Option(
-                    "--ignore",
-                    help="Exclude paths matching this prefix (repeatable).",
-                ),
-            ] = [],
-        ) -> None:
-            self._run_cache_clear(
-                yes=yes,
-                verbose=verbose,
-                no_browsers=no_browsers,
-                ignore=ignore,
-            )
-
-        self._cache_app.command(
-            "clear",
-            help="Remove os caches listados no plano (confirmação ou --yes).",
-        )(cache_clear_handler)
-
-    def _run_cache_plan(self, *, no_browsers: bool, ignore: list[str]) -> None:
-        console = Console()
-        command = CacheCommand(
-            ignore=list(ignore),
-            include_browsers=not no_browsers,
-            console=console,
-        )
-        command.run_plan()
-
-    def _run_cache_clear(
-        self,
-        *,
-        yes: bool,
-        verbose: bool,
-        no_browsers: bool,
-        ignore: list[str],
-    ) -> None:
-        console = Console()
-        command = CacheCommand(
-            ignore=list(ignore),
-            include_browsers=not no_browsers,
-            console=console,
-        )
-        command.run_clear(assume_yes=yes, verbose=verbose)
+cli = WhirlpoolCLI.create_default()
+app = cli.app
 
 
 def main() -> None:
-    WhirlpoolCLI().run()
+    cli.run()

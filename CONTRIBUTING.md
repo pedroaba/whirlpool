@@ -81,7 +81,7 @@ Whirlpool can **inspect** and **delete** files under cache-related paths dependi
 
 ## Project layout
 
-- **`whirlpool/`** — Python package (CLI in `whirlpool/cli.py`, commands under `whirlpool/command/`, disk logic under `whirlpool/disk/`, utilities under `whirlpool/utils/`).
+- **`whirlpool/`** — Python package: `cli.py` (Typer app wiring), `models/` (e.g. `ProjectMetadata`), `command/` (command objects and Typer groups such as `cache_group.py`), `disk/` (cache and disk logic), `utils/`.
 - **`main.py`** — thin entry that delegates to the CLI (optional local runner).
 - **`pyproject.toml`** — project metadata, dependencies, `uv_build` settings, and tool config (Black, isort, Flake8, pytest, taskipy).
 
