@@ -1,6 +1,8 @@
 import os
 from pathlib import Path
 
+from whirlpool.utils.format import Formatter
+
 
 class FileUtils:
     @staticmethod
@@ -36,3 +38,7 @@ class FileUtils:
                     continue
 
         return total_size
+
+    @staticmethod
+    def human_readable_size(size: int) -> str:
+        return Formatter.format_filesize(size)

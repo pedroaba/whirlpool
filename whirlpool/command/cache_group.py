@@ -17,19 +17,19 @@ class CacheCommandGroup:
     ) -> None:
         self._console_factory = console_factory or Console
         self.app = typer.Typer(
-            help="Inspecionar e limpar caches do usuário e de navegadores.",
+            help="Inspect and clear user and browser caches.",
             no_args_is_help=True,
         )
         self.app.command(
             "plan",
             help=(
-                "Mostra resumo do cache e os caminhos que seriam removidos "
-                "(não apaga nada)."
+                "Shows a cache summary and the paths that would be removed "
+                "(does not delete anything)."
             ),
         )(self.plan)
         self.app.command(
             "clear",
-            help="Remove os caches listados no plano (confirmação ou --yes).",
+            help="Removes the caches listed in the plan (confirmation or --yes).",
         )(self.clear)
 
     def plan(

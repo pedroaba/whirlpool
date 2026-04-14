@@ -1,13 +1,22 @@
-from dataclasses import dataclass, field
+from pydantic import BaseModel, ConfigDict, Field
 
 from whirlpool import __version__
 
 
-@dataclass(slots=True)
-class ProjectMetadata:
-    name: str = "Whirlpool"
-    description: str = (
-        "Uma interface de linha de comando (CLI) "
-        "para facilitar tarefas de limpeza, manutenção e otimização no macOS."
+class ProjectMetadata(BaseModel):
+    """
+    Basic Whirlpool project metadata for display in the CLI.
+    """
+
+    model_config = ConfigDict(
+        frozen=True,
     )
-    version: str = field(default=__version__)
+
+    name: str = Field(default="Whirlpool")
+    description: str = Field(
+        default=(
+            "A command-line interface (CLI) "
+            "to facilitate cleanup, maintenance, and optimization tasks on macOS."
+        )
+    )
+    version: str = Field(default=__version__)
