@@ -14,6 +14,15 @@ class FileUtils:
         if not target.exists():
             return 0
 
+        if target.is_symlink():
+            return 0
+
+        if target.is_file():
+            try:
+                return target.lstat().st_size
+            except OSError:
+                return 0
+
         total_size = 0
         base_depth = len(target.parts)
 
