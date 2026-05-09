@@ -6,7 +6,7 @@
 [![uv](https://img.shields.io/badge/build-uv-665CCC.svg)](https://docs.astral.sh/uv/)
 [![Version](https://img.shields.io/badge/version-0.1.0-informational.svg)](https://github.com/pedroaba/whirlpool)
 
-A **macOS** command-line tool for **disk cleanup** workflows with a **review-first** mindset: inspect caches, manage applications under `~/Library`, and avoid blind deletes.
+A **macOS** command-line tool for **disk cleanup** workflows with a **review-first** mindset: inspect caches, and avoid blind deletes. Application-focused commands (`whirlpool apps`) are documented below but are **still under construction**—see that section for details.
 
 Instead of silently removing files like many closed-source cleaners, Whirlpool focuses on **visibility**: what was found, where it lives, and how much space may be reclaimed **before** anything is removed.
 
@@ -65,6 +65,8 @@ whirlpool cache clear --verbose
 ```
 
 ### `whirlpool apps`
+
+**Work in progress:** The `apps` commands are still under construction. UX, heuristics, and safety behavior may change between releases. For predictable cleanup today, rely on **`whirlpool cache`** (`plan` / `clear`).
 
 | Command | Description |
 | ------- | ----------- |
@@ -154,7 +156,7 @@ Cache and app removal are **destructive**. Always run **`cache plan`** (or revie
 - **`cache plan`** does not delete files.
 - **`cache clear`** deletes the planned paths after confirmation (or with `--yes`). Files are **not** moved to Finder Trash.
 - Cache folders may be recreated by macOS or apps; some apps may need a restart after cleanup.
-- **`apps remove`** can delete application bundles and related data—use only when you understand the removal plan.
+- **`apps remove`** can delete application bundles and related data—use only when you understand the removal plan. The whole **`apps`** command group is still **under construction**; treat it as experimental.
 
 ---
 
@@ -178,7 +180,7 @@ Use **`cache plan`** first and review output. Removal is irreversible; use **`--
 
 ### Does `apps remove` move apps to Trash?
 
-**No.** It follows the interactive removal plan and deletes targeted paths on disk after confirmation.
+**No.** It follows the interactive removal plan and deletes targeted paths on disk after confirmation. The **`apps`** commands are still **under construction**—behavior may change.
 
 ### Does it clean browser cache?
 
