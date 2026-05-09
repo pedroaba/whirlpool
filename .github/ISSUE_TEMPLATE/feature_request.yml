@@ -1,0 +1,46 @@
+name: Feature request
+description: Suggest an idea or enhancement for Whirlpool
+labels:
+  - enhancement
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or motivation
+      description: What problem does this solve? Who benefits?
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution
+      description: Describe what you would like to see added or changed.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Other approaches you considered (optional).
+    validations:
+      required: false
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - cache
+        - apps
+        - tui
+        - docs
+        - tooling
+        - other
+    validations:
+      required: true
+  - type: checkboxes
+    id: coc
+    attributes:
+      label: Confirmations
+      options:
+        - label: I have read the [Code of Conduct](https://github.com/pedroaba/whirlpool/blob/main/CODE_OF_CONDUCT.md)
+          required: true

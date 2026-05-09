@@ -2,6 +2,8 @@
 
 Thanks for your interest in improving this project. This document explains how to work in the repository and what we expect from contributions.
 
+This project adopts the [Contributor Covenant](CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code.
+
 ## Scope and platform
 
 - **Whirlpool** targets **macOS** only (paths and behavior assume a Mac user layout).
@@ -68,26 +70,34 @@ Fix any reported issues in the files you touched.
 ## Commits and pull requests
 
 - Use **clear commit messages**. We recommend [Conventional Commits](https://www.conventionalcommits.org/) (e.g. `fix(cli): …`, `feat(whirlpool): …`, `docs(readme): …`).
+- When opening an issue or PR, please use the templates in [`.github/`](.github/) so we can triage faster.
 - In the PR description, explain **what** changed and **why**, and how you **verified** it (commands you ran, manual checks on macOS).
 - Link related **issues** or discussions when applicable.
 
 ## Safety and privacy
 
-Whirlpool can **inspect** and **delete** files under cache-related paths depending on the command. When testing:
+Whirlpool can **inspect** and **delete** files depending on the command. When testing:
 
 - **`cache plan`** is read-only; use it to see what **`cache clear`** would target.
 - **`cache clear`** removes planned paths from disk (not Finder Trash) after confirmation unless you pass **`--yes`**. Test on disposable data or a throwaway user when possible.
+- **`apps remove`** can delete application bundles and related data after confirmation in the TUI. Exercise extreme caution; prefer VMs or test accounts when validating destructive paths.
 - Do not assume CI covers all macOS behaviors; call out **manual** test steps in the PR when relevant.
 
 ## Project layout
 
-- **`whirlpool/`** — Python package: `cli.py` (Typer app wiring), `models/` (e.g. `ProjectMetadata`), `command/` (command objects and Typer groups such as `cache_group.py`), `disk/` (cache and disk logic), `utils/`.
+- **`whirlpool/`** — Python package: `cli.py` (Typer app wiring), `models/` (e.g. `ProjectMetadata`), `command/` (command objects and Typer groups such as `cache_group.py`, `application_group.py`), `disk/` (cache and disk logic), `utils/`.
 - **`main.py`** — thin entry that delegates to the CLI (optional local runner).
 - **`pyproject.toml`** — project metadata, dependencies, `uv_build` settings, and tool config (Black, isort, Flake8, pytest, taskipy).
 
 ## Legal
 
-The project is **proprietary** (see [LICENSE](LICENSE)). By contributing, you confirm that your submission is compatible with the terms the maintainers apply to this repository (e.g. you have the right to grant the necessary permissions for the contribution to be merged and used in the project). If you are unsure, ask the maintainers before opening a large change.
+This project is licensed under the [Apache License, Version 2.0](LICENSE).
+By submitting a contribution, you agree that your work will be licensed under
+the same terms (Apache-2.0). Per Section 5 of the license, contributions you
+intentionally submit for inclusion are licensed to the project and its users
+under those terms, without any additional conditions.
+
+See [NOTICE](NOTICE) for project attributions.
 
 ## Questions
 

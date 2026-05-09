@@ -1,0 +1,26 @@
+name: Question
+description: Ask a question about Whirlpool (usage, design, contribution)
+labels:
+  - question
+body:
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: What are you trying to do? What have you tried?
+    validations:
+      required: true
+  - type: textarea
+    id: question
+    attributes:
+      label: Question
+      description: Your question in one place.
+    validations:
+      required: true
+  - type: checkboxes
+    id: coc
+    attributes:
+      label: Confirmations
+      options:
+        - label: I have read the [Code of Conduct](https://github.com/pedroaba/whirlpool/blob/main/CODE_OF_CONDUCT.md)
+          required: true
